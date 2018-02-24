@@ -3,17 +3,13 @@ trait Printable[A] {
 }
 
 object PrintableInstances {
-  implicit val stringPrintable: Printable[String] =
-    new Printable[String] {
-      def format(value: String): String =
-        value
-    }
+  implicit val stringPrintable = new Printable[String] {
+    def format(value: String) = value
+  }
 
-  implicit val intPrintable: Printable[Int] =
-    new Printable[Int] {
-      def format(value: Int): String =
-        value.toString
-    }
+  implicit val intPrintable = new Printable[Int] {
+    def format(value: Int) = value.toString
+  }
 }
 
 object Printable {
@@ -21,10 +17,11 @@ object Printable {
     p.format(value)
 
   def print[A](value: A)(implicit p: Printable[A]): Unit =
-    println(p.format(value))
+    println(format(value))
 }
 
 object PrintableLibrary extends App {
+
   import PrintableInstances._
 
   println(Printable.format("string for format"))
