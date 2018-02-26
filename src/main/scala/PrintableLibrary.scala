@@ -26,9 +26,19 @@ object Printable {
     println(format(value))
 }
 
-object PrintableLibrary extends App {
+object PrintableSyntax {
+  implicit class PrintableOps[A](value: A) {
+    def format(implicit p: Printable[A]): String =
+      p.format(value)
 
+    def print(implicit p: Printable[A]): Unit =
+      println(p.format(value))
+  }
+}
+
+object PrintableLibrary extends App {
   import PrintableInstances._
+  import PrintableSyntax._
 
   println(Printable.format("string for format"))
   Printable.print("string for print")
@@ -37,8 +47,8 @@ object PrintableLibrary extends App {
   Printable.print(123)
 
   val cat = Cat("Smokey", 2, "grey")
-  println(Printable.format(cat))
-  Printable.print(cat)
+  println(cat.format)
+  cat.print
 
   println(implicitly[Printable[String]])
 }
