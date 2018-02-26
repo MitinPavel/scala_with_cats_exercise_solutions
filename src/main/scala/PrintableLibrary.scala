@@ -1,3 +1,5 @@
+final case class Cat(name: String, age: Int, color: String)
+
 trait Printable[A] {
   def format(value: A): String
 }
@@ -9,6 +11,10 @@ object PrintableInstances {
 
   implicit val intPrintable = new Printable[Int] {
     def format(value: Int) = value.toString
+  }
+
+  implicit val catPrintable = new Printable[Cat] {
+    def format(cat: Cat) = cat.name + " is a " + cat.age.toString + " year-old " + cat.color + " cat."
   }
 }
 
@@ -29,6 +35,10 @@ object PrintableLibrary extends App {
 
   println(Printable.format(42))
   Printable.print(123)
+
+  val cat = Cat("Smokey", 2, "grey")
+  println(Printable.format(cat))
+  Printable.print(cat)
 
   println(implicitly[Printable[String]])
 }
