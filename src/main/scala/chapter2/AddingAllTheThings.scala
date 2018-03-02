@@ -6,9 +6,7 @@ import cats.implicits._
 
 class SuperAdder {
   def add(items: List[Int]): Int = {
-    items.fold(cats.Monoid[Int].empty) { (acc, current) =>
-      acc |+| current
-    }
+    items.fold(cats.Monoid[Int].empty)(_ |+| _)
   }
 }
 
