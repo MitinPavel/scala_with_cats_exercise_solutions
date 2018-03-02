@@ -20,4 +20,13 @@ class AddingAllTheThingsSpec extends FlatSpec with Checkers {
       a.add(l).getOrElse(0) == l.flatten.sum
     })
   }
+
+  "SuperAdder" should "work with List[Order]" in {
+    import chapter2.OrderMonoidInstances._
+
+    val a = new SuperAdder
+
+    assert(a.add(List(Order(1, 1))) == Order(1, 1))
+    assert(a.add(List(Order(1, 10), Order(2, 20))) == Order(3, 30))
+  }
 }
