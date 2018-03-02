@@ -5,7 +5,7 @@ package chapter2
 import cats.implicits._
 
 class SuperAdder {
-  def add[A](items: List[A])(implicit m: cats.Monoid[A]): A = {
+  def add[A: cats.Monoid](items: List[A]): A = {
     items.fold(cats.Monoid[A].empty)(_ |+| _)
   }
 }
