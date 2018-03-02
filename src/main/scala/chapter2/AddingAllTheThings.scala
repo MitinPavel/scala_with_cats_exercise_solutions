@@ -5,11 +5,12 @@ package chapter2
 import cats.implicits._
 
 class SuperAdder {
-  def add(items: List[Int]): Int = {
-    items.fold(cats.Monoid[Int].empty)(_ |+| _)
+  def add[A](items: List[A])(implicit m: cats.Monoid[A]): A = {
+    items.fold(cats.Monoid[A].empty)(_ |+| _)
   }
 }
 
 object AddingAllTheThings extends App {
-  (new SuperAdder).add(List(1, 2, 3))
+  println((new SuperAdder).add(List(1, 2, 3)))
+  println((new SuperAdder).add(List(Some(1), None, Some(2))))
 }
