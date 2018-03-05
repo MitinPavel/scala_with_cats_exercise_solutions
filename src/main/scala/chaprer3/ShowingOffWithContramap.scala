@@ -1,13 +1,14 @@
 package chaprer3
 
 trait Printable[A] {
+  self =>
+
   def format(value: A): String
 
-  def contramap[B](func: B => A)(implicit p: Printable[A]): Printable[B] =
+  def contramap[B](func: B => A): Printable[B] =
     new Printable[B] {
       def format(value: B): String = {
-        val a: A = func(value)
-        Printable.format(a)
+        self.format(func(value))
       }
     }
 }
@@ -18,23 +19,13 @@ object PrintableInstances {
   }
 }
 
-object Printable {
-  def format[A](value: A)(implicit p: Printable[A]): String =
-    p.format(value)
-
-  def contramap[A, B](func: B => A)(implicit p: Printable[A]): Printable[B] =
-    p.contramap(func)
-}
-
 object PrintableSyntax {
 
   implicit class PrintableOps[A](value: A) {
-    def format(implicit p: Printable[A]): String =
-      p.format(value)
-
     def contramap[B](func: B => A)(implicit p: Printable[A]): Printable[B] =
       p.contramap(func)
   }
+
 }
 
 object ShowingOffWithContramap extends App {
