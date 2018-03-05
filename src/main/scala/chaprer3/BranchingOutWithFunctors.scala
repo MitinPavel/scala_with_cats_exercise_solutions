@@ -1,10 +1,9 @@
 package chaprer3
 
-import cats.Functor
+import cats.implicits._
 import TreeFunctorInstance._
 
 object BranchingOutWithFunctors extends App {
-  val tree = Leaf(123)
-  val newTree = Functor[Tree].map(tree)(_ + 1)
-  println(newTree)
+  Tree.leaf(100).map(_ * 2)
+  Tree.branch(Tree.leaf(10), Tree.leaf(20)).map(_ * 2)
 }

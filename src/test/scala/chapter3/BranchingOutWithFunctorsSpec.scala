@@ -4,23 +4,22 @@ import org.scalatest.FlatSpec
 
 class BranchingOutWithFunctorsSpec extends FlatSpec {
 
+  import cats.implicits._
   import chaprer3.TreeFunctorInstance._
 
   it should "map a leaf" in {
-    val tree = Leaf(41)
-    val actual =  cats.Functor[Tree].map(tree)(_ + 1)
-    assert(Leaf(42) == actual)
+    assert(Tree.leaf(42) == Tree.leaf(41).map(_ + 1))
   }
 
   it should "map the simplest branch" in {
-    val tree = Branch(Leaf(1), Leaf(2))
-    val actual =  cats.Functor[Tree].map(tree)(_ * 10)
-    assert(Branch(Leaf(10), Leaf(20)) == actual)
+    val tree = Tree.branch(Tree.leaf(1), Tree.leaf(2))
+    val actual = tree.map(_ * 10)
+    assert(Tree.branch(Tree.leaf(10), Tree.leaf(20)) == actual)
   }
 
   it should "map a branch" in {
-    val tree = Branch(Leaf(1), Branch(Leaf(2), Leaf(3)))
-    val actual =  cats.Functor[Tree].map(tree)(_ * 10)
-    assert(Branch(Leaf(10), Branch(Leaf(20), Leaf(30))) == actual)
+    val tree = Tree.branch(Tree.leaf(1), Tree.branch(Tree.leaf(2), Tree.leaf(3)))
+    val actual = tree.map(_ * 10)
+    assert(Tree.branch(Tree.leaf(10), Tree.branch(Tree.leaf(20), Tree.leaf(30))) == actual)
   }
 }
