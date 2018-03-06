@@ -14,8 +14,19 @@ trait Printable[A] {
 }
 
 object PrintableInstances {
-  implicit val booleanPrintable = new Printable[Boolean] {
-    def format(value: Boolean) = if (value) "true" else "false"
+  implicit val stringPrintable: Printable[String] =
+    new Printable[String] {
+      def format(value: String): String =
+        "\"" + value + "\""
+    }
+  implicit val booleanPrintable: Printable[Boolean] =
+    new Printable[Boolean] {
+      def format(value: Boolean): String =
+        if (value) "yes" else "no"
+    }
+
+  implicit def boxPrintable[A](implicit printableA: Printable[A]): Printable[Box[A]] = {
+    printableA.contramap[Box[A]](_.value)
   }
 }
 
@@ -24,6 +35,9 @@ object PrintableSyntax {
   implicit class PrintableOps[A](value: A) {
     def contramap[B](func: B => A)(implicit p: Printable[A]): Printable[B] =
       p.contramap(func)
+
+    def format(implicit p: Printable[A]): String =
+      p.format(value)
   }
 
 }
@@ -35,4 +49,7 @@ object ShowingOffWithContramap extends App {
 
   var pritnableForInt = true.contramap[Int](n => if (n == 1) true else false)
   println(pritnableForInt.format(1))
+
+  println(Box(true).format)
+  println(Box("hello").format)
 }
