@@ -9,10 +9,7 @@ object CodecInstances {
     }
 
   implicit def boxCodex[A](implicit c: Codec[A]): Codec[Box[A]] =
-    c.imap[Box[A]](
-      (a: A) => Box(a),
-      (b: Box[A]) => b.value
-    )
+    c.imap[Box[A]](Box(_), _.value)
 }
 
 object TransformativeThinkingWithImap extends App {
