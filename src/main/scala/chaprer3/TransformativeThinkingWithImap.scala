@@ -7,6 +7,12 @@ object CodecInstances {
 
       def decode(value: String): Boolean = value == "yes"
     }
+
+  implicit def boxCodex[A](implicit c: Codec[A]): Codec[Box[A]] =
+    c.imap[Box[A]](
+      (a: A) => Box(a),
+      (b: Box[A]) => b.value
+    )
 }
 
 object TransformativeThinkingWithImap extends App {
@@ -14,11 +20,14 @@ object TransformativeThinkingWithImap extends App {
   import CodecInstances._
 
   println(Codec.encode(true))
-  println(Codec.decode("no"))
+  println(Codec.decode[Boolean]("no"))
 
   val intCodec = Codec.imap(
     (b: Boolean) => if (b) 1 else 0,
     (n: Int) => n == 1
   )
   println(intCodec.encode(0))
+
+  println(Codec.encode[Box[Boolean]](Box(true)))
+  println(Codec.encode[Box[Boolean]](Box(false)))
 }
