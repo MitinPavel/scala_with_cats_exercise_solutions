@@ -1,25 +1,22 @@
 package chapter4
 
 import cats.data.Writer
+import cats.syntax.applicative._
 import cats.syntax.writer._
+import cats.instances.vector._
 
 object FactorialCalculator {
-  type IntLogger = Writer[Vector[String], Int]
+  type Logged[A] = Writer[Vector[String], A]
 
-  def factorial(n: Int): IntLogger = slowly(calculate(n))
-
-  private def calculate(n: Int): IntLogger = {
-    if (n == 0) 1.writer(Vector(s"fact 0 1"))
-    else {
-      val current = factorial(n - 1)
-      val value = n * current.value
-
-      current.bimap(
-        log => log :+ s"fact $n $value",
-        _ => value
-      )
-    }
-  }
+  def factorial(n: Int): Logged[Int] =
+    for {
+      current <- if (n == 0) {
+        1.pure[Logged]
+      } else {
+        slowly(factorial(n - 1).map(_ * n))
+      }
+      _ <- Vector(s"fact $n $current").tell
+    } yield current
 
   private def slowly[A](body: => A) =
     try body finally Thread.sleep(100)
