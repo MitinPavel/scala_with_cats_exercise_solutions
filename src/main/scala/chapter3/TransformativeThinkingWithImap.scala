@@ -1,4 +1,4 @@
-package chaprer3
+package chapter3
 
 object CodecInstances {
   implicit val booleanCodec: Codec[Boolean] =

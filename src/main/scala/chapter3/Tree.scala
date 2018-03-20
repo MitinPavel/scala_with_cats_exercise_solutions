@@ -1,4 +1,4 @@
-package chaprer3
+package chapter3
 
 import cats._
 

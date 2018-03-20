@@ -1,11 +1,11 @@
-package chaprer3
+package chapter3
 
 import org.scalatest.FlatSpec
 
 class BranchingOutWithFunctorsSpec extends FlatSpec {
 
   import cats.implicits._
-  import chaprer3.TreeFunctorInstance._
+  import chapter3.TreeFunctorInstance._
 
   it should "map a leaf" in {
     assert(Tree.leaf(42) == Tree.leaf(41).map(_ + 1))

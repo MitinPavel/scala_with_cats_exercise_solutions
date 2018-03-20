@@ -1,4 +1,4 @@
-package chaprer3
+package chapter3
 
 import cats.implicits._
 import TreeFunctorInstance._

@@ -1,3 +1,3 @@
-package chaprer3
+package chapter3
 
 final case class Box[A](value: A)
