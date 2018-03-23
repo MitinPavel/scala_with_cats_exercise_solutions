@@ -8,22 +8,25 @@ object PostOrderCalculator extends App {
 
   def evalOne(sym: String): CalcState[Int] =
     sym match {
-      case "+" => State[List[Int], Int] { stack =>
-        val operand1 :: operand2 :: tail = stack
-        val result = operand1 + operand2
-
-        (result :: tail, result)
-      }
-      case "*" => for {
-        stack <- State.get[List[Int]]
-        (operand1 :: operand2 :: tail) = stack
-        _ <- State.modify[List[Int]](_ => (operand1 * operand2) :: tail)
-
-      } yield operand1 * operand2
-      case number => for {
-        _ <- State.modify[List[Int]](number.toInt :: _)
-      } yield number.toInt
+      case "+" => operator(_ + _)
+      case "*" => operator(_ * _)
+      case number => operand(number.toInt)
     }
+
+  def operator(func: (Int, Int) => Int) = {
+    State[List[Int], Int] { stack =>
+      val operand1 :: operand2 :: tail = stack
+      val result = func(operand1, operand2)
+
+      (result :: tail, result)
+    }
+  }
+
+  def operand(int: Int) = {
+    for {
+      _ <- State.modify[List[Int]](int :: _)
+    } yield int
+  }
 
   def evalAll(input: List[String]): CalcState[Int] =
     input.foldLeft(State.pure[List[Int], Int](0)) { (acc, sym) =>
