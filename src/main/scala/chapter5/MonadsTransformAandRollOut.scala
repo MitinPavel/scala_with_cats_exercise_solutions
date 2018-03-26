@@ -24,9 +24,10 @@ object MonadsTransformAandRollOut extends App {
   }
 
   def canSpecialMove(ally1: String, ally2: String): Response[Boolean] =
-    getPowerLevel(ally1).flatMap { l1 =>
-      getPowerLevel(ally2).map(l2 => l1 + l2 > 15)
-    }
+    for {
+      l1 <- getPowerLevel(ally1)
+      l2 <- getPowerLevel(ally2)
+    } yield (l1 + l2) > 15
 
   println(Await.result(getPowerLevel("Bumblebee").value, 5.second))
   println(Await.result(getPowerLevel("Blah").value, 5.second))
