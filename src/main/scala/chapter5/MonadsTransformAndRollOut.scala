@@ -7,7 +7,7 @@ import scala.concurrent.{Future, Await}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
-object MonadsTransformAandRollOut extends App {
+object MonadsTransformAndRollOut extends App {
   type Response[A] = EitherT[Future, String, A]
 
   val powerLevels = Map(
@@ -29,9 +29,21 @@ object MonadsTransformAandRollOut extends App {
       l2 <- getPowerLevel(ally2)
     } yield (l1 + l2) > 15
 
+  def tacticalReport(ally1: String, ally2: String): String = {
+    Await.result(canSpecialMove(ally1, ally2).value, 5.second) match {
+      case Left(error) => s"Comms error: $error"
+      case Right(true) => s"$ally1 and $ally1 are ready to roll out!"
+      case Right(false) => s"$ally1 and $ally1 need a recharge."
+    }
+  }
+
   println(Await.result(getPowerLevel("Bumblebee").value, 5.second))
   println(Await.result(getPowerLevel("Blah").value, 5.second))
 
   println(Await.result(canSpecialMove("Jazz", "Bumblebee").value, 5.second))
   println(Await.result(canSpecialMove("Jazz", "Hot Rod").value, 5.second))
+
+  println(tacticalReport("Jazz", "Bumblebee"))
+  println(tacticalReport("Bumblebee", "Hot Rod"))
+  println(tacticalReport("Jazz", "Ironhide"))
 }
