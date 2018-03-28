@@ -1,5 +1,7 @@
 package chapter6
 
 object FormValidation extends App {
-  println(FailFastFormValidator.getValue("name")(Map("name" -> "Dade Murphy")))
+  val data = Map("name" -> "John Doe", "age" -> "20")
+  println(FailFastFormValidator.readName(data))
+  println(FailFastFormValidator.readAge(data))
 }
