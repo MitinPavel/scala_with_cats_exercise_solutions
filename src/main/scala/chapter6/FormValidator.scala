@@ -2,19 +2,27 @@ package chapter6
 
 import cats.syntax.either._
 import cats.data.Validated
+import cats.instances.list._ // for Semigroupal
+import cats.Semigroupal
 
-object FailFastFormValidator {
+object FormValidator {
   type FormData = Map[String, String]
   type FailFast[A] = Either[List[String], A]
   type FailSlow[A] = Validated[List[String], A]
 
-  def readName(data: FormData): FailFast[String] =
+  def createUser(data: FormData): FailSlow[User] =
+    Semigroupal[FailSlow].product(
+      Validated.fromEither(readName(data)),
+      Validated.fromEither(readAge(data))
+    ).map[User]((t: (String, Int)) => User(t._1, t._2))
+
+  private def readName(data: FormData): FailFast[String] =
     for {
       value <- getValue("name")(data)
       result <- nonBlank("name")(value)
     } yield result
 
-  def readAge(data: FormData): FailFast[Int] =
+  private def readAge(data: FormData): FailFast[Int] =
     for {
       value <- getValue("age")(data)
       int <- parseInt("age")(value)
