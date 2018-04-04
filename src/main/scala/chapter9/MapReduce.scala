@@ -1,10 +1,9 @@
 package chapter9
 
 import cats.Monoid
+import cats.syntax.semigroup._
 
 object MapReduce {
-  def foldMap[A, B: Monoid](sequence: Vector[A])(f: A => B): B =
-    sequence.map(f).foldLeft(Monoid[B].empty) { (acc, b) =>
-      Monoid[B].combine(acc, b)
-    }
+  def foldMap[A, B: Monoid](as: Vector[A])(f: A => B): B =
+    as.foldLeft(Monoid[B].empty)(_ |+| f(_))
 }
