@@ -2,13 +2,16 @@ package chapter8
 
 import scala.language.higherKinds
 import scala.concurrent.Future
+import cats.Applicative
+import cats.Functor
 import cats.Id
 import cats.instances.list._
 import cats.syntax.traverse._
+import cats.syntax.functor._
 
-class UptimeService(client: UptimeClient[Id]) {
-  def getTotalUptime(hostnames: List[String]): Id[Int] =
-    hostnames.traverse(client.getUptime).sum
+class UptimeService[F[_]: Functor](client: UptimeClient[F])(implicit applicative: Applicative[F]) {
+  def getTotalUptime(hostnames: List[String]): F[Int] =
+    hostnames.traverse(client.getUptime).map(_.sum)
 }
 
 trait RealUptimeClient extends UptimeClient[Future] {
