@@ -16,4 +16,5 @@ object MapReduceCaseStudy extends App {
   import scala.concurrent.duration._
 
   println(Await.result(MultithreadedMapReduce.parallelFoldMap((1 to 100).toVector)(_.toString), 1.second))
+  println(Await.result(CatsMapReduce.parallelFoldMap((1 to 100).toVector)(_.toString), 1.second))
 }
