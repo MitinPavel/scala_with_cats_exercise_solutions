@@ -1,29 +1,30 @@
 package chapter9
 
-import cats.Monoid
-import cats.syntax.semigroup._
 import cats.Foldable
-import cats.instances.vector._ // for Applicative
+
+import cats.Traverse
+import cats.instances.future._ // for Applicative
+import cats.instances.list._ // for Traverse
+import cats.Monoid
+import cats.syntax.foldable._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 object CatsMapReduce {
   def parallelFoldMap[A, B: Monoid](values: Vector[A])(f: A => B): Future[B] = {
-    val batches = values.grouped(batchCount(values.size)).toList
+    val batches: List[List[A]] = values.grouped(batchCount(values.size)).toList.map(_.toList)
 
-    val futureList: List[Future[B]] = batches.map { as =>
-      Future(foldMap(as)(f(_)))
+    val fut: Future[List[B]] = Traverse[List].traverse(batches) { as: List[A] =>
+      Future { Foldable[List].foldMap(as)(f) }
     }
 
-    Future.sequence(futureList).map { bs =>
-      bs.foldLeft(Monoid[B].empty)(_ |+| _)
+    fut.map { bs: List[B] =>
+      bs.combineAll
     }
   }
 
   private def batchCount[A](totalCount: Int) =
     (1.0 * totalCount / Runtime.getRuntime.availableProcessors).ceil.toInt
 
-  private def foldMap[A, B: Monoid](as: Vector[A])(f: A => B): B =
-    Foldable[Vector].foldMap(as)(f(_))
 }
