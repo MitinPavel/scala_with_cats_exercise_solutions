@@ -1,19 +1,14 @@
 package chapter10
 
+import cats.data.Validated
 import cats.Semigroup
-import cats.syntax.either._ // for asLeft and asRight
+import cats.syntax.apply._ // for tupled
 
-case class Check[E, A](f: A => Either[E, A]) {
-  def apply(a: A): Either[E, A] = f(a)
+case class Check[E, A](f: A => Validated[E, A]) {
+  def apply(a: A): Validated[E, A] = f(a)
 
   def and(that: Check[E, A])(implicit semigroup: Semigroup[E]): Check[E, A] =
-    Check { a: A => {
-      (this(a), that(a)) match {
-        case (Right(_), Right(_)) => a.asRight
-        case (Left(e1), Right(_)) => e1.asLeft
-        case (Right(_), Left(e2)) => e2.asLeft
-        case (Left(e1), Left(e2)) => semigroup.combine(e1, e2).asLeft
-      }
-    }
+    Check { a: A =>
+      (this(a), that(a)).tupled.map(_._1)
     }
 }
