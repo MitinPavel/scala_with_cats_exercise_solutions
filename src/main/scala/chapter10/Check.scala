@@ -1,14 +1,22 @@
 package chapter10
 
-import cats.data.Validated
 import cats.Semigroup
-import cats.syntax.apply._ // for tupled
+import cats.data.Validated
+import cats.syntax.apply._ // for mapN
 
-case class Check[E, A](f: A => Validated[E, A]) {
-  def apply(a: A): Validated[E, A] = f(a)
+sealed trait Check[E, A] {
+  def and(that: Check[E, A]): Check[E, A] =
+    And(this, that)
 
-  def and(that: Check[E, A])(implicit semigroup: Semigroup[E]): Check[E, A] =
-    Check { a: A =>
-      (this(a), that(a)).tupled.map(_._1)
+  def apply(a: A)(implicit s: Semigroup[E]): Validated[E, A] =
+    this match {
+      case Pure(func) =>
+        func(a)
+      case And(left, right) =>
+        (left(a), right(a)).mapN((_, _) => a)
     }
 }
+
+final case class And[E, A](left: Check[E, A], right: Check[E, A]) extends Check[E, A]
+
+final case class Pure[E, A](func: A => Validated[E, A]) extends Check[E, A]
