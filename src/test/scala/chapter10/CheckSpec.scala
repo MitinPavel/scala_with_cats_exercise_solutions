@@ -30,4 +30,11 @@ class CheckSpec extends FlatSpec {
     assert(And(isOneSymbolCheck, isPresentCheck)("abc") == List("consist of one symbol").invalid[String])
     assert(And(isOneSymbolCheck, isPresentCheck)("a") == "a".valid[List[String]])
   }
+
+  "or" should "be disjunctive" in {
+    assert(Or(isEmptyCheck, isOneSymbolCheck)("abc") == List("be empty", "consist of one symbol").invalid[String])
+    assert(Or(isPresentCheck, isOneSymbolCheck)("abc") == "abc".valid[List[String]])
+    assert(Or(isOneSymbolCheck, isPresentCheck)("abc") == "abc".valid[List[String]])
+    assert(Or(isOneSymbolCheck, isPresentCheck)("abc") == "abc".valid[List[String]])
+  }
 }
