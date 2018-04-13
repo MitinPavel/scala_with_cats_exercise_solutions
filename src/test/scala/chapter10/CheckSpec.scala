@@ -46,4 +46,15 @@ class CheckSpec extends FlatSpec {
     assert(oneSymbolIntCheck("a") == List("not an integer").invalid[String])
     assert(oneSymbolIntCheck("aa") == List("not an integer").invalid[String])
   }
+
+  "andThen" should "chane checks" in {
+    val intStringCheck = Check(isInt)
+    val oneSymbolCheck = Check(isOneSymbol)
+    val oneSymbolIntCheck = intStringCheck.andThen(oneSymbolCheck)
+
+    assert(oneSymbolIntCheck("1") == "1".valid[List[String]])
+    assert(oneSymbolIntCheck("11") == List("has invalid length").invalid[String])
+    assert(oneSymbolIntCheck("a") == List("not an integer").invalid[String])
+    assert(oneSymbolIntCheck("aa") == List("not an integer").invalid[String])
+  }
 }
