@@ -7,13 +7,13 @@ import cats.syntax.validated._
 import cats.instances.list._
 
 class CheckSpec extends FlatSpec {
-  val isInt = Pure { str: String =>
+  val isInt = Predicate { str: String =>
     Try(str.toInt).toOption match {
       case Some(_) => str.valid[List[String]]
       case None => List("not an integer").invalid[String]
     }
   }
-  val isOneSymbol = Pure { str: String =>
+  val isOneSymbol = Predicate { str: String =>
     if (str.length == 1) str.valid[List[String]]
     else List("has invalid length").invalid[String]
   }
