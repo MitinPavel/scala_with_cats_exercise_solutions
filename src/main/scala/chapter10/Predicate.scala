@@ -36,7 +36,7 @@ sealed trait Predicate[E, A] {
         }
     }
 
-  def run()(implicit s: Semigroup[E]): A => Either[E, A] =
+  def run(implicit s: Semigroup[E]): A => Either[E, A] =
     (a: A) => apply(a).toEither
 }
 

@@ -1,12 +1,23 @@
 package chapter10
 
-import cats.data.{NonEmptyList, Validated}
-import cats.syntax.apply._ // for mapN
-import cats.syntax.validated._ // for valid and invalid
+import cats.data.{Kleisli, NonEmptyList, Validated}
+import cats.syntax.apply._
+import cats.instances.either._ // for Semigroupal
+import cats.instances.list._ // for Monad
 
 
 object DataValidationCaseStudy extends App {
   type Errors = NonEmptyList[String]
+  type Result[A] = Either[Errors, A]
+  type Check[A, B] = Kleisli[Result, A, B]
+
+  // Create a check from a function:
+  def check[A, B](func: A => Result[B]): Check[A, B] =
+    Kleisli(func)
+
+  // Create a check from a Predicate:
+  def checkPred[A](pred: Predicate[Errors, A]): Check[A, A] =
+    Kleisli[Result, A, A](pred.run)
 
   def error(s: String): NonEmptyList[String] =
     NonEmptyList(s, Nil)
@@ -31,42 +42,42 @@ object DataValidationCaseStudy extends App {
       error(s"Must contain the character $char only once"),
       str => str.filter(c => c == char).size == 1)
 
-  // A username must contain at least four characters
-  // and consist entirely of alphanumeric characters
-  val checkUsername: Check[Errors, String, String] = Check(longerThan(3) and alphanumeric)
+  val checkUsername: Check[String, String] =
+    checkPred(longerThan(3) and alphanumeric)
 
-  // An email address must contain a single `@` sign.
-  // Split the string at the `@`.
-  // The string to the left must not be empty.
-  // The string to the right must be
-  // at least three characters long and contain a dot.
-  val splitEmail: Check[Errors, String, (String, String)] =
-  Check(_.split('@') match {
-    case Array(name, domain) =>
-      (name, domain).validNel[String]
-    case other =>
-      "Must contain a single @ character".
-        invalidNel[(String, String)]
-  })
-  val checkLeft: Check[Errors, String, String] =
-    Check(longerThan(0))
-  val checkRight: Check[Errors, String, String] =
-    Check(longerThan(3) and contains('.'))
+  println(checkUsername("ab"))
 
-  val joinEmail: Check[Errors, (String, String), String] =
-    Check { case (l, r) =>
-      (checkLeft(l), checkRight(r)).mapN(_ + "@" + _)
+  val splitEmail: Check[String, (String, String)] =
+    check(_.split('@') match {
+      case Array(name, domain) =>
+        Right((name, domain))
+      case other =>
+        Left(error("Must contain a single @ character"))
+    })
+
+  val checkLeft: Check[String, String] =
+    checkPred(longerThan(0))
+
+  val checkRight: Check[String, String] =
+    checkPred(longerThan(3) and contains('.'))
+
+  val joinEmail: Check[(String, String), String] =
+    check {
+      case (l, r) =>
+        (checkLeft(l), checkRight(r)).mapN(_ + "@" + _)
     }
-  val checkEmail: Check[Errors, String, String] =
+
+  val checkEmail: Check[String, String] =
     splitEmail andThen joinEmail
 
   final case class User(username: String, email: String)
 
-  def createUser(username: String,
-                 email: String): Validated[Errors, User] =
-    (checkUsername(username), checkEmail(email)).mapN(User)
+  def createUser(username: String, email: String): Either[Errors, User] =
+    (
+      checkUsername.run(username),
+      checkEmail.run(email)
+    ).mapN(User)
 
   println(createUser("Noel", "noel@underscore.io"))
   println(createUser("", "dave@underscore@io"))
-
 }
