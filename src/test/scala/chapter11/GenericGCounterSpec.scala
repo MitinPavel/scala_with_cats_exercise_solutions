@@ -5,7 +5,8 @@ import org.scalatest.FlatSpec
 import org.scalatest.prop.Checkers
 import cats.Monoid
 
-class GCounterSpec extends FlatSpec with Checkers {
+
+class GenericGCounterSpec extends FlatSpec with Checkers {
   implicit def arbitrary(implicit a: Arbitrary[List[Int]]) =
     Arbitrary(Gen.containerOf[List, Int](Gen.chooseNum(1, 10)))
 
@@ -13,7 +14,7 @@ class GCounterSpec extends FlatSpec with Checkers {
     import cats.instances.int._
 
     check((counts: List[Int]) => {
-      val counter = increment("a", GCounter[Int](Map()), counts)
+      val counter = increment("a", GenericGCounter[Int](Map()), counts)
 
       counts.sum == counter.total
     })
@@ -23,8 +24,8 @@ class GCounterSpec extends FlatSpec with Checkers {
     import cats.instances.int._
 
     check((input1: List[List[Int]], input2: List[List[Int]]) => {
-      var counter1 = GCounter[Int](Map())
-      var counter2 = GCounter[Int](Map())
+      var counter1 = GenericGCounter[Int](Map())
+      var counter2 = GenericGCounter[Int](Map())
 
       input1.zipAll(input2, List(), List()).foreach { (ls) =>
         counter1 = increment("one", counter1, ls._1)
@@ -42,7 +43,7 @@ class GCounterSpec extends FlatSpec with Checkers {
     })
   }
 
-  private def increment[A](machine: String, counter: GCounter[A], counts: List[A])(implicit m: Monoid[A]) =
+  private def increment[A](machine: String, counter: GenericGCounter[A], counts: List[A])(implicit m: Monoid[A]) =
     counts.
       foldLeft(counter) { (a, i) => a.increment(machine, i) }
 }
