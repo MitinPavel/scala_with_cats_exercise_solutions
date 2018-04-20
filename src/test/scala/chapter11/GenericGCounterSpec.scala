@@ -5,7 +5,6 @@ import org.scalatest.FlatSpec
 import org.scalatest.prop.Checkers
 import cats.Monoid
 
-
 class GenericGCounterSpec extends FlatSpec with Checkers {
   implicit def arbitrary(implicit a: Arbitrary[List[Int]]) =
     Arbitrary(Gen.containerOf[List, Int](Gen.chooseNum(1, 10)))
